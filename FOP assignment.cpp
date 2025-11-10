@@ -5,19 +5,19 @@
 
 using namespace std;
 
-struct menuItem{
+struct MenuItem{
     int id;
     double price;
     string name, category;
 };
 
-struct cartItem{
-    menuItem order;
+struct CartItem{
+    MenuItem order;
     int quantity;
     double totalPrice;
 };
 
-vector<menuItem> menu = {
+vector<MenuItem> menu = {
     {1, 2.0, "Roti Canai", "Main"},   
     {2, 3.0, "Nasi Lemak", "Main"},
     {3, 5.0, "Nasi Briyani", "Main"}, 
@@ -25,7 +25,7 @@ vector<menuItem> menu = {
     {5, 2.0, "Kopi O", "Drink"},
 };
 
-vector<cartItem> cart;
+vector<CartItem> cart;
 
 void mainMenu(){
     cout << "\n===== Welcome to Restaurant Management System =====\n\n";
@@ -47,7 +47,8 @@ void displayMenu(){
     cout << string(42, '-') << endl;
 }
 
-void addToCart(vector<menuItem> menu, vector<cartItem> &cart){
+void addToCart(vector<MenuItem> menu, vector<CartItem> &cart){
+	displayMenu();
     int id;
     int quantity;
     cout << "Enter Item ID: ";
@@ -68,7 +69,7 @@ void addToCart(vector<menuItem> menu, vector<cartItem> &cart){
     for (int i = 0; i < menu.size(); i++){
         if (menu[i].id == id){
             found = true;
-            cartItem newItem = {menu[i], quantity, menu[i].price * quantity};
+            CartItem newItem = {menu[i], quantity, menu[i].price * quantity};
             cart.push_back(newItem);
             cout << "Item added to cart." << endl;
             break;
@@ -78,7 +79,7 @@ void addToCart(vector<menuItem> menu, vector<cartItem> &cart){
         cout << "There is no such item! Please try again." << endl;
 }
 
-void viewCart(const vector<cartItem> &cart){
+void viewCart(const vector<CartItem> &cart){
     if(cart.empty()){
         cout << "Cart is empty." << endl;
         return;
@@ -99,7 +100,7 @@ void viewCart(const vector<cartItem> &cart){
 
 }
 
-void removeFromCart(vector<cartItem> &cart){
+void removeFromCart(vector<CartItem> &cart){
   if(cart.empty()){
     cout << "Cart is empty." << endl;
     return;
@@ -184,5 +185,3 @@ int main(){
         }
     }
 }
-
-//testpullrequest//
