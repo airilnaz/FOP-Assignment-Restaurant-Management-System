@@ -30,6 +30,22 @@ vector<MenuItem> menu = {
 
 vector<CartItem> cart;
 
+int tableNumber = 0;
+int pax = 0;
+
+void Table() 
+{
+    cout << "Enter table number: ";
+    cin >> tableNumber;
+
+    cout << "Enter number of pax: ";
+    cin >> pax;
+
+    cout << "\n--- Table Details ---\n";
+    cout << "Table Number: " << tableNumber << endl;
+    cout << "Number of Pax: " << pax << endl;
+}
+
 void mainMenu() {
   cout << "\n===== Welcome to Restaurant Management System =====\n\n";
   cout << "1. Dine Option" << endl;
@@ -251,6 +267,12 @@ bool checkout(vector<CartItem> &cart, int DineOption){
   cout << right << setw(34) << "================= ORDER SUMMARY ================\n" << endl;
   cout << left << setw(5) << ctime(&timestamp) << endl;
   cout << left << setw(5) << "Dine Option: " << setw(16) << optionName[DineOption - 1] << endl;
+  
+  if (DineOption == 1) { // Dine In
+    cout << left << setw(5) << "Table Number: " << setw(16) << tableNumber << endl;
+    cout << left << setw(5) << "No. of Pax: " << setw(16) << pax << endl;
+}
+  
   cout << left << setw(5) << "Total Quantity: " << setw(16) << getTotalQuantity(cart)<< endl;
   cout << string(48, '-') << endl;
   cout << left << setw(5) << "ID" << setw(16) << "Item" << setw(16) << "Quantity" << "Total Price" << endl;
@@ -293,6 +315,9 @@ int main() {
     switch (choice) {
     case 1:
       DineOpt = DineOption();
+     if (DineOpt == 1) { 
+        Table();      
+    }
       break;
     case 2:
       displayMenu();
@@ -318,4 +343,5 @@ int main() {
     }
   }
 }
+
 
