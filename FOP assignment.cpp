@@ -230,6 +230,24 @@ int DineOption(){
 
   return option;
 }
+
+int Payment() 
+{
+    int paymentOption;
+    cout << "\nChoose Payment Method:\n";
+    cout << "1. Credit or Debit card" << endl;
+    cout << "2. QR Code Payment" << endl;
+    cout << "3. Cash" << endl;
+    cout << "\nEnter payment option: ";
+    cin >> paymentOption;
+
+    while (paymentOption < 1 || paymentOption > 3) {
+        cout << "Invalid option. Please choose 1, 2, or 3: ";
+        cin >> paymentOption;
+    }
+    return paymentOption;
+}
+
 int getTotalQuantity(vector<CartItem> &cart){
     int total = 0;
     for(const auto &item : cart){
@@ -284,6 +302,7 @@ bool checkout(vector<CartItem> &cart, int DineOption){
   cout << right << setw(39) << "Subtotal       : RM" << Total << endl;
   cout << right << setw(39) << "Service Tax(6%): RM" << Total * 0.06 << endl;
   cout << right << setw(39) << "Rounding       : RM" << fabs(rounding(Total * 1.06) - Total * 1.06) << endl;
+    double finalTotal = rounding(Total * 1.06);
   cout << right << setw(39) << "Total(Inc. Tax): RM" << rounding(Total * 1.06) << endl;
   cout << right << setw(34) << "================================================" << endl;
 
@@ -291,6 +310,16 @@ bool checkout(vector<CartItem> &cart, int DineOption){
     cout << "\nConfirm checkout? (Y/N): ";
     cin >> confirm;
     if(confirm == 'Y' || confirm == 'y'){
+      
+        int paymentChoice = Payment();
+        string paymentMethods[] = {"Credit or Debit Card", "QR Code Payment", "Cash"};
+
+        // **NEW: Displaying Final Confirmation with Payment Method**
+        cout << "\n--- Final Transaction Details ---\n";
+        cout << "Amount Due: RM" << fixed << setprecision(2) << finalTotal << endl;
+        cout << "Payment Method: " << paymentMethods[paymentChoice - 1] << endl;
+        cout << "Processing Payment..." << endl;
+      
       cout << "Checkout successful. Thank you for your order!" << endl;
       return true;
     }
@@ -341,5 +370,6 @@ int main() {
     }
   }
 }
+
 
 
