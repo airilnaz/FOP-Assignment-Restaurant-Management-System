@@ -1,12 +1,16 @@
+#include <iostream>
 #include <ctime>
 #include <iomanip>
-#include <iostream>
 #include <vector>
 #include <cmath>
+#include <string>
+#include <fstream>
 
 using namespace std;
 
-int DineOption();
+int tableNumber = 0;
+int pax = 0;
+int DineOpt=0;
 
 struct MenuItem {
   int id;
@@ -30,8 +34,51 @@ vector<MenuItem> menu = {
 
 vector<CartItem> cart;
 
-int tableNumber = 0;
-int pax = 0;
+void saveMenuToFile() {
+    ofstream file("menu.txt"); 
+    
+    if (file.is_open()) {
+        file << menu.size() << endl; 
+
+        for (int i = 0; i < menu.size(); i++) {
+            file << menu[i].id << endl;
+            file << menu[i].price << endl;
+            file << menu[i].name << endl;
+            file << menu[i].category << endl;
+        }
+        file.close();
+    } 
+    else
+      cout << "Error: Unable to save menu." << endl;
+}
+
+void loadMenuFromFile() {
+    ifstream file("menu.txt");
+    
+    if (!file.is_open()) {
+        saveMenuToFile();
+        return; 
+    }
+
+    int totalItems;
+    file >> totalItems;
+
+    menu.clear();
+
+    for (int i = 0; i < totalItems; i++) {
+        MenuItem item;
+        
+        file >> item.id;
+        file >> item.price;
+        
+        file.ignore(); 
+        getline(file, item.name);
+        getline(file, item.category);
+
+        menu.push_back(item);
+    }
+    file.close();
+}
 
 void Table() 
 {
@@ -46,21 +93,10 @@ void Table()
     cout << "Number of Pax: " << pax << endl;
 }
 
-void mainMenu() {
-  cout << "\n===== Welcome to Restaurant Management System =====\n\n";
-  cout << "1. Dine Option" << endl;
-  cout << "2. View Menu" << endl;
-  cout << "3. Add Item to Cart" << endl;
-  cout << "4. View Cart" << endl;
-  cout << "5. Remove Item from Cart" << endl;
-  cout << "6. Checkout" << endl;
-  cout << "7. Exit\n" << endl;
-}
-
 void displayMenu() {
   cout << right << setw(34) << "========== MENU ==========" << endl;
   cout << left << setw(5) << "ID" << setw(16) << "Item" << setw(16)
-       << "Category" << "Price" << endl;
+  << "Category" << "Price" << endl;
   cout << string(42, '-') << endl;
   for (int i = 0; i < menu.size(); i++)
     cout << left << setw(5) << menu[i].id << setw(16) << menu[i].name
@@ -69,7 +105,28 @@ void displayMenu() {
   cout << string(42, '-') << endl;
 }
 
-void viewCart(const vector<CartItem> &cart);
+void viewCart(const vector<CartItem> &cart) {
+  if (cart.empty()) {
+    cout << "Cart is empty." << endl;
+    return;
+  }
+
+  cout << right << setw(34) << "========== CART ==========" << endl;
+  cout << left << setw(5) << "ID" << setw(16) << "Item" << setw(16)
+       << "Quantity" << "Total Price" << endl;
+  cout << string(42, '-') << endl;
+
+  double Total = 0;
+  for (int i = 0; i < cart.size(); i++) {
+    cout << left << setw(5) << cart[i].order.id << setw(16)
+         << cart[i].order.name << setw(16) << cart[i].quantity << fixed
+         << setprecision(2) << "RM" << cart[i].totalPrice << endl;
+    Total += cart[i].totalPrice;
+  }
+  cout << string(42, '-') << endl;
+  cout << "Total (excl. tax): RM" << Total << endl;
+  cout << string(42, '-') << endl;
+}
 
 void addToCart(vector<MenuItem> menu, vector<CartItem> &cart) {
   char addMore = 'Y';
@@ -144,29 +201,6 @@ void addToCart(vector<MenuItem> menu, vector<CartItem> &cart) {
     }
   }
     cout << "\n";
-}
-
-void viewCart(const vector<CartItem> &cart) {
-  if (cart.empty()) {
-    cout << "Cart is empty." << endl;
-    return;
-  }
-
-  cout << right << setw(34) << "========== CART ==========" << endl;
-  cout << left << setw(5) << "ID" << setw(16) << "Item" << setw(16)
-       << "Quantity" << "Total Price" << endl;
-  cout << string(42, '-') << endl;
-
-  double Total = 0;
-  for (int i = 0; i < cart.size(); i++) {
-    cout << left << setw(5) << cart[i].order.id << setw(16)
-         << cart[i].order.name << setw(16) << cart[i].quantity << fixed
-         << setprecision(2) << "RM" << cart[i].totalPrice << endl;
-    Total += cart[i].totalPrice;
-  }
-  cout << string(42, '-') << endl;
-  cout << "Total (excl. tax): RM" << Total << endl;
-  cout << string(42, '-') << endl;
 }
 
 void removeFromCart(vector<CartItem> &cart) {
@@ -329,41 +363,157 @@ bool checkout(vector<CartItem> &cart, int DineOption){
     }
 }
 
+void addMenuItem(){
+  MenuItem newItem;
+  bool itemExistCheck=false;
 
+  do{
+    itemExistCheck=false;
+    cout << "\nEnter new item ID: ";
+    cin >> newItem.id;
+    for(const auto &i : menu){
+      if(i.id==newItem.id){
+        cout << "Item with same ID already exists. Please try again."<<endl;
+        itemExistCheck=true;
+        break;
+        }
+      }
+    }while(itemExistCheck);
 
-int main() {
-  int choice = 0;
-  int DineOpt = 0;
-  while (choice != 7) {
-    mainMenu();
-    cout << "Enter your choice: ";
+  cin.ignore();
+  
+  cout << "Enter Item Name: ";
+  getline(cin, newItem.name);
+
+  int categoryChoice;
+  do{
+    cout << "Enter Item Category(1-Main, 2-Drink): ";
+    cin >> categoryChoice;
+    
+    if (categoryChoice == 1)
+      newItem.category = "Main";
+    else if (categoryChoice == 2)
+      newItem.category = "Drink";
+    else cout << "Invalid choice, please enter 1 or 2.\n" << endl;
+  }while(categoryChoice!=1 && categoryChoice!=2);
+  cout << "Enter Item Price: RM";
+  cin >> newItem.price;
+
+  menu.push_back(newItem);
+
+  saveMenuToFile();
+}
+
+void removeMenuItem() {
+    int id;
+    bool itemExists = false;
+    
+    displayMenu();
+    cout << "\nEnter Item ID to remove: ";
+    cin >> id;
+
+    for (auto it = menu.begin(); it != menu.end(); ++it) {
+        if (it->id == id) {
+            menu.erase(it); 
+            itemExists = true;
+            cout << "Item removed successfully." << endl;
+            
+            saveMenuToFile(); 
+            break;
+        }
+    }
+
+    if (!itemExists) {
+        cout << "Item ID not found." << endl;
+    }
+}
+
+void editMenuItem() {
+    int id;
+    bool itemExists = false;
+
+    displayMenu(); // Show menu so user knows the IDs
+    cout << "\nEnter Item ID to edit: ";
+    cin >> id;
+
+    for (auto &item : menu) {
+        if (item.id == id) {
+            itemExists = true;
+            int editChoice = 0;
+
+            cout << "\nCurrently Editing Item: " << item.name << endl;
+            cout << "1. Edit Name" << endl;
+            cout << "2. Edit Price" << endl;
+            cout << "3. Edit Category" << endl;
+            cout << "4. Cancel" << endl;
+            cout << "Enter choice: ";
+            cin >> editChoice;
+
+            if (editChoice == 1) {
+                cout << "Enter New Name: ";
+                cin.ignore();
+                getline(cin, item.name);
+                cout << "Name updated." << endl;
+            } 
+            else if (editChoice == 2) {
+                cout << "Enter New Price: RM";
+                cin >> item.price;
+                cout << "Price updated." << endl;
+            } 
+            else if (editChoice == 3) {
+                int catChoice;
+                do {
+                    cout << "Enter New Category (1-Main, 2-Drink): ";
+                    cin >> catChoice;
+                    if (catChoice == 1) 
+                      item.category = "Main";
+                    else if (catChoice == 2) 
+                      item.category = "Drink";
+                    else 
+                      cout << "Invalid choice." << endl;
+                }while (catChoice != 1 && catChoice != 2);
+                cout << "Category updated." << endl;
+            } 
+            else {
+                cout << "Edit cancelled." << endl;
+                return;
+            }
+
+            saveMenuToFile();
+            break; 
+        }
+    }
+
+    if (!itemExists) {
+        cout << "Item ID not found." << endl;
+    }
+}
+
+void displayOrder() {
+  int choice=0;
+
+  if (DineOpt == 0){
+    DineOpt = DineOption();
+      if (DineOpt == 1)
+      Table();
+  }
+
+  while (choice!=3){
+    cout << "\n===== Order Menu =====\n\n";
+    cout << "1. View Menu" << endl;
+    cout << "2. Add Item to Cart" << endl;
+    cout << "3. Return" << endl;
+    
+    cout << "\nEnter choice: ";
     cin >> choice;
-    cout << "\n";
     switch (choice) {
     case 1:
-      DineOpt = DineOption();
-      if (DineOpt == 1) { 
-        Table();      
-    }
-      break;
-    case 2:
       displayMenu();
       break;
+    case 2:
+      addToCart(menu,cart);
+      break;
     case 3:
-      addToCart(menu, cart);
-      break;
-    case 4:
-      viewCart(cart);
-      break;
-    case 5:
-      removeFromCart(cart);
-      break;
-    case 6:
-      if(checkout(cart, DineOpt))
-        choice = 7;
-      break;
-    case 7:
-      cout << "Thank you for using our Restaurant Management System." << endl;
       break;
     default:
       cout << "\nInvalid choice. Please try again.\n\n";
@@ -371,5 +521,100 @@ int main() {
   }
 }
 
+void displayCart() {
+  int choice=0;
+  while (choice!=4){
+    cout << "\n===== Cart Menu =====\n\n";
+    cout << "1. View Cart" << endl;
+    cout << "2. Remove Item" << endl;
+    cout << "3. Checkout" << endl;
+    cout << "4. Return" << endl;
+    
+    cout << "\nEnter choice: ";
+    cin >> choice;
+    switch (choice) {
+    case 1:
+      viewCart(cart);
+      break;
+    case 2:
+      removeFromCart(cart);
+      break;
+    case 3:
+      checkout(cart,DineOpt);
+      break;
+    case 4:
+        break;
+    default:
+      cout << "\nInvalid choice. Please try again.\n\n";
+    }
+  }
+}
 
+void displayAdmin() {
+  int choice=0;
 
+  while (choice!=5){
+    cout << "\n===== Admin Menu =====\n\n";
+    cout << "1. Add Menu Item" << endl;
+    cout << "2. Delete Menu Item" << endl;
+    cout << "3. Edit Existing Menu Item" << endl;
+    cout << "4. Generate Sales Reports" << endl;
+    cout << "5. Return" << endl;
+
+    cout << "\nEnter choice: ";
+    cin >> choice;  
+    switch (choice) {
+    case 1:
+      addMenuItem();
+      break;
+    case 2:
+      removeMenuItem();
+      break;
+    case 3:
+      editMenuItem();
+      break;
+    case 4:
+      break;
+    case 5:
+      break;
+    default:
+      cout << "\nInvalid choice. Please try again.\n\n";
+    }
+  }
+}
+
+bool displayMain() {
+  int choice = 0;
+  cout << "\n===== Welcome to Restaurant Management System =====\n\n";
+  cout << "1. Create Orders" << endl;
+  cout << "2. Cart" << endl;
+  cout << "3. Admin Panel" << endl;
+  cout << "4. Exit" << endl;
+
+  cout << "\nEnter choice: ";
+  cin >> choice;
+
+  switch (choice) {
+    case 1:
+      displayOrder();
+      break;
+    case 2:
+      displayCart();
+      break;
+    case 3:
+      displayAdmin();
+      break;
+    case 4:
+      cout << "Thank you for using our Restaurant Management System." << endl;
+      return false;
+    default:
+      cout << "\nInvalid choice. Please try again.\n\n";
+  }
+  return (true);
+}
+
+int main() {
+  loadMenuFromFile();
+  while (displayMain()) {}
+  return(0);
+}
