@@ -34,6 +34,59 @@ vector<MenuItem> menu = {
 
 vector<CartItem> cart;
 
+string salesFile = "sales.txt";
+
+void generateSimpleReport() {
+    ifstream file(salesFile);
+    if (!file.is_open()) {
+        cout << "No sales file found.\n";
+        return;
+    }
+
+    cout << "\n=== Sales Report ===\n";
+    cout << "1. Daily\n";
+    cout << "2. Monthly\n";
+    cout << "3. Yearly\n";
+    cout << "Choose: ";
+    
+    int opt;
+    cin >> opt;
+
+    string key;
+    if (opt == 1) {
+        cout << "Enter date (YYYY-MM-DD): ";
+    } else if (opt == 2) {
+        cout << "Enter month (YYYY-MM): ";
+    } else if (opt == 3) {
+        cout << "Enter year (YYYY): ";
+    } else {
+        cout << "Invalid option.\n";
+        return;
+    }
+    cin >> key;
+
+    double total = 0;
+    string line;
+
+    cout << "\nMatching Records:\n";
+
+    while (getline(file, line)) {
+        if (line.rfind(key, 0) == 0) {  // starts with key
+            cout << line << endl;
+
+            size_t pos = line.find("|");
+            if (pos != string::npos) {
+                double amount = stod(line.substr(pos + 1));
+                total += amount;
+            }
+        }
+    }
+
+    cout << "\nTotal Sales: RM" << fixed << setprecision(2) << total << endl;
+    file.close();
+}
+
+
 void saveMenuToFile() {
     ofstream file("menu.txt"); 
     
@@ -355,6 +408,17 @@ bool checkout(vector<CartItem> &cart, int DineOption){
         cout << "Processing Payment..." << endl;
       
       cout << "Checkout successful. Thank you for your order!" << endl;
+      ofstream sales(salesFile, ios::app);
+      time_t now = time(0);
+      tm *ltm = localtime(&now);
+
+      char dateStr[11];
+      sprintf(dateStr, "%04d-%02d-%02d",
+        1900 + ltm->tm_year,
+        1 + ltm->tm_mon,
+        ltm->tm_mday);
+      sales << dateStr << " | " << finalTotal << endl;
+      sales.close();
       return true;
     }
     else{
@@ -574,6 +638,7 @@ void displayAdmin() {
       editMenuItem();
       break;
     case 4:
+      generateSimpleReport();
       break;
     case 5:
       break;
