@@ -408,6 +408,28 @@ bool checkout(vector<CartItem> &cart, int DineOption){
         cout << "Processing Payment..." << endl;
       
       cout << "Checkout successful. Thank you for your order!" << endl;
+      cout << "\n============= OFFICIAL RECEIPT =============" << endl;
+      cout << "Date: " << ctime(&timestamp);
+      cout << "Dine Option: " << optionName[DineOption - 1] << endl;
+      if(DineOption == 1){
+         cout << "Table No: " << tableNumber << endl;
+         cout << "Pax: " << pax << endl;
+      }
+      cout << "---------------------------------------------" << endl;
+      cout << left << setw(15) << "Item" << setw(10) << "Qty" << "Total" << endl;
+      for(auto &item : cart){
+      cout << left << setw(15) << item.order.name
+      << setw(10) << item.quantity
+      << "RM" << fixed << setprecision(2) << item.totalPrice << endl;
+      }
+
+
+      cout << "---------------------------------------------" << endl;
+      cout << "Subtotal : RM" << Total << endl;
+      cout << "Service Tax(6%): RM" << Total * 0.06 << endl;
+      cout << "Rounding : RM" << fabs(rounding(Total * 1.06) - Total * 1.06) << endl;
+      cout << "TOTAL : RM" << finalTotal << endl;
+      cout << "=============================================\n";
       ofstream sales(salesFile, ios::app);
       time_t now = time(0);
       tm *ltm = localtime(&now);
@@ -683,3 +705,4 @@ int main() {
   while (displayMain()) {}
   return(0);
 }
+
