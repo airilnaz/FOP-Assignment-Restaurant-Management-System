@@ -1,3 +1,16 @@
+// Reference: 
+//1.“Vector in C++ STL,” 
+// Author : GeeksforGeeks. 
+// Last updated: 19 Sep 2025.  
+// Accessed on: 21 Oct 2025
+// https://www.geeksforgeeks.org/cpp/vector-in-cpp-stl/
+
+////2. “Structures in C++,” 
+// GeeksforGeeks. 
+// Last updated: 25 Oct 2025.
+// Accesed on : 21 Oct 2025
+//https://www.geeksforgeeks.org/cpp/structures-in-cpp/
+
 #include <iostream>
 #include <ctime>
 #include <iomanip>
@@ -83,7 +96,7 @@ void generateSimpleReport() {
         cout << "Year : " << key << endl;
 
     cout << "-----------------------------------------------\n";
-    cout << "Order ID | Table | Pax | Total Sales\n";
+    cout << "Date | Order ID | Table | Pax | Total Sales\n";
     cout << "-----------------------------------------------\n";
 
     double totalSales = 0;
