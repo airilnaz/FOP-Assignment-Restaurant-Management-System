@@ -44,45 +44,68 @@ void generateSimpleReport() {
     }
 
     cout << "\n=== Sales Report ===\n";
-    cout << "1. Daily\n";
-    cout << "2. Monthly\n";
-    cout << "3. Yearly\n";
+    cout << "1. Daily Report\n";
+    cout << "2. Monthly Report\n";
+    cout << "3. Yearly Report\n";
     cout << "Choose: ";
-    
+
     int opt;
     cin >> opt;
 
     string key;
+
     if (opt == 1) {
         cout << "Enter date (YYYY-MM-DD): ";
-    } else if (opt == 2) {
+    } 
+    else if (opt == 2) {
         cout << "Enter month (YYYY-MM): ";
-    } else if (opt == 3) {
+    } 
+    else if (opt == 3) {
         cout << "Enter year (YYYY): ";
-    } else {
+    } 
+    else {
         cout << "Invalid option.\n";
         return;
     }
+
     cin >> key;
 
-    double total = 0;
+    cout << "\n================= SALES REPORT =================\n";
+    cout << "RESTORAN RMS\n";
+    cout << "Jalan Kontraktor U1/14, Glenpark U1, 40150 Shah Alam, Selangor\n";
+    cout << "-----------------------------------------------\n";
+
+    if (opt == 1)
+        cout << "Date : " << key << endl;
+    else if (opt == 2)
+        cout << "Month: " << key << endl;
+    else
+        cout << "Year : " << key << endl;
+
+    cout << "-----------------------------------------------\n";
+    cout << "Order ID | Table | Pax | Total Sales\n";
+    cout << "-----------------------------------------------\n";
+
+    double totalSales = 0;
     string line;
 
-    cout << "\nMatching Records:\n";
-
     while (getline(file, line)) {
-        if (line.rfind(key, 0) == 0) {  // starts with key
+        if (line.rfind(key, 0) == 0) {
             cout << line << endl;
 
-            size_t pos = line.find("|");
+            // extract last value (after last '|')
+            size_t pos = line.find_last_of('|');
             if (pos != string::npos) {
                 double amount = stod(line.substr(pos + 1));
-                total += amount;
+                totalSales += amount;
             }
         }
     }
 
-    cout << "\nTotal Sales: RM" << fixed << setprecision(2) << total << endl;
+    cout << "-----------------------------------------------\n";
+    cout << "TOTAL SALES: RM" << fixed << setprecision(2) << totalSales << endl;
+    cout << "===============================================\n";
+
     file.close();
 }
 
@@ -358,74 +381,125 @@ double rounding(double amount){
 }
 
 bool checkout(vector<CartItem> &cart, int DineOption){
-  time_t timestamp;
-  time(&timestamp);
-  if(DineOption == 0){
-    cout << "Please choose your dine option first." << endl;
-    return false;
-  }
-  if(cart.empty()){
-    cout << "Cart is empty." << endl;
-    return false;
-  }
-  string optionName[] = {"Dine In","Take Away"};
-  cout << right << setw(34) << "================= ORDER SUMMARY ================\n" << endl;
-  cout << left << setw(5) << ctime(&timestamp) << endl;
-  cout << left << setw(5) << "Dine Option: " << setw(16) << optionName[DineOption - 1] << endl;
- if (DineOption == 1) { // Dine In
-    cout << left << setw(5) << "Table Number: " << setw(16) << tableNumber << endl;
-    cout << left << setw(5) << "No. of Pax: " << setw(16) << pax << endl;
-}
-  cout << left << setw(5) << "Total Quantity: " << setw(16) << getTotalQuantity(cart)<< endl;
-  cout << string(48, '-') << endl;
-  cout << left << setw(5) << "ID" << setw(16) << "Item" << setw(16) << "Quantity" << "Total Price" << endl;
-  cout << string(48, '-') << endl;
-  double Total = 0;
-  for (int i = 0; i < cart.size(); i++){
-      cout << left << setw(5) << cart[i].order.id << setw(16) << cart[i].order.name << setw(16) << cart[i].quantity << fixed << setprecision(2) << "RM" << cart[i].totalPrice << endl;
-      Total += cart[i].totalPrice;
-      }
-  cout << string(48, '-') << endl;
-  cout << right << setw(39) << "Subtotal       : RM" << Total << endl;
-  cout << right << setw(39) << "Service Tax(6%): RM" << Total * 0.06 << endl;
-  cout << right << setw(39) << "Rounding       : RM" << fabs(rounding(Total * 1.06) - Total * 1.06) << endl;
-    double finalTotal = rounding(Total * 1.06);
-  cout << right << setw(39) << "Total(Inc. Tax): RM" << rounding(Total * 1.06) << endl;
-  cout << right << setw(34) << "================================================" << endl;
+    time_t timestamp;
+    time(&timestamp);
 
-  char confirm;
+    if(DineOption == 0){
+        cout << "Please choose your dine option first." << endl;
+        return false;
+    }
+    if(cart.empty()){
+        cout << "Cart is empty." << endl;
+        return false;
+    }
+
+    string optionName[] = {"Dine In","Take Away"};
+
+    cout << right << setw(34) << "================= ORDER SUMMARY ================\n" << endl;
+    cout << left << setw(5) << ctime(&timestamp) << endl;
+    cout << left << setw(5) << "Dine Option: " << setw(16) << optionName[DineOption - 1] << endl;
+
+    if (DineOption == 1) {
+        cout << left << setw(5) << "Table Number: " << setw(16) << tableNumber << endl;
+        cout << left << setw(5) << "No. of Pax: " << setw(16) << pax << endl;
+    }
+
+    cout << left << setw(5) << "Total Quantity: " << setw(16) << getTotalQuantity(cart)<< endl;
+    cout << string(48, '-') << endl;
+    cout << left << setw(5) << "ID" << setw(16) << "Item" << setw(16) << "Quantity" << "Total Price" << endl;
+    cout << string(48, '-') << endl;
+
+    double Total = 0;
+    for (int i = 0; i < cart.size(); i++){
+        cout << left << setw(5) << cart[i].order.id
+             << setw(16) << cart[i].order.name
+             << setw(16) << cart[i].quantity
+             << "RM" << fixed << setprecision(2) << cart[i].totalPrice << endl;
+        Total += cart[i].totalPrice;
+    }
+
+    cout << string(48, '-') << endl;
+    cout << right << setw(39) << "Subtotal       : RM" << Total << endl;
+    cout << right << setw(39) << "Service Tax(6%): RM" << Total * 0.06 << endl;
+    cout << right << setw(39) << "Rounding       : RM" 
+         << fabs(rounding(Total * 1.06) - Total * 1.06) << endl;
+
+    double finalTotal = rounding(Total * 1.06);
+
+    cout << right << setw(39) << "Total(Inc. Tax): RM" << finalTotal << endl;
+    cout << right << setw(34) << "================================================" << endl;
+
+    char confirm;
     cout << "\nConfirm checkout? (Y/N): ";
     cin >> confirm;
+
     if(confirm == 'Y' || confirm == 'y'){
-      
+
         int paymentChoice = Payment();
         string paymentMethods[] = {"Credit or Debit Card", "QR Code Payment", "Cash"};
 
-        // **NEW: Displaying Final Confirmation with Payment Method**
         cout << "\n--- Final Transaction Details ---\n";
         cout << "Amount Due: RM" << fixed << setprecision(2) << finalTotal << endl;
         cout << "Payment Method: " << paymentMethods[paymentChoice - 1] << endl;
         cout << "Processing Payment..." << endl;
-      
-      cout << "Checkout successful. Thank you for your order!" << endl;
-      ofstream sales(salesFile, ios::app);
-      time_t now = time(0);
-      tm *ltm = localtime(&now);
 
-      char dateStr[11];
-      sprintf(dateStr, "%04d-%02d-%02d",
-        1900 + ltm->tm_year,
-        1 + ltm->tm_mon,
-        ltm->tm_mday);
-      sales << dateStr << " | " << finalTotal << endl;
-      sales.close();
-      return true;
+        cout << "Checkout successful. Thank you for your order!" << endl;
+        cout << "\n============= OFFICIAL RECEIPT =============" << endl;
+        int orderCounter = 1000;
+        orderCounter++;
+        string orderID = "OID" + to_string(orderCounter);
+        cout << "Order ID: " << orderID << endl;
+        cout << "Date: " << ctime(&timestamp);
+        cout << "Dine Option: " << optionName[DineOption - 1] << endl;
+
+        if(DineOption == 1){
+            cout << "Table No: " << tableNumber << endl;
+            cout << "Pax: " << pax << endl;
+        }
+
+        cout << "---------------------------------------------" << endl;
+        cout << left << setw(15) << "Item" 
+             << setw(10) << "Qty" << "Total" << endl;
+
+        for(auto &item : cart){
+            cout << left << setw(15) << item.order.name
+                 << setw(10) << item.quantity
+                 << "RM" << fixed << setprecision(2) << item.totalPrice << endl;
+        }
+
+        cout << "---------------------------------------------" << endl;
+        cout << "Subtotal : RM" << Total << endl;
+        cout << "Service Tax(6%): RM" << Total * 0.06 << endl;
+        cout << "Rounding : RM" 
+             << fabs(rounding(Total * 1.06) - Total * 1.06) << endl;
+        cout << "TOTAL : RM" << finalTotal << endl;
+        cout << "=============================================\n";
+        ofstream sales(salesFile, ios::app);
+        time_t now = time(0);
+        tm *ltm = localtime(&now);
+
+        char dateStr[11];
+        sprintf(dateStr, "%04d-%02d-%02d",
+                1900 + ltm->tm_year,
+                1 + ltm->tm_mon,
+                ltm->tm_mday);
+
+        sales << dateStr << " | "
+              << orderID << " | "
+              << (DineOption == 1 ? "T" + to_string(tableNumber) : string("Takeaway")) << " | "
+              << (DineOption == 1 ? to_string(pax) : "-") << " | "
+              << fixed << setprecision(2) << finalTotal
+              << endl;
+
+        sales.close();
+        return true;
     }
     else{
-      cout << "Returning to main menu." << endl;
-      return false;
+        cout << "Returning to main menu." << endl;
+        return false;
     }
 }
+
 
 void addMenuItem(){
   MenuItem newItem;
