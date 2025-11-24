@@ -11,6 +11,24 @@
 // Accesed on : 21 Oct 2025
 //https://www.geeksforgeeks.org/cpp/structures-in-cpp/
 
+// 3. “C++ setw() function in C++ with Examples,”  
+//GeeksforGeeks.  
+//Last updated: 09 Nov 2025.  
+//Accessed on: 03 Nov 2025.  
+//https://www.geeksforgeeks.org/cpp/setw-function-in-cpp-with-examples/
+
+// 4. “C++ Dates and Time,”  
+// W3Schools.  
+// Last updated: 3 Nov 2025.  
+// Accessed on: 1 Nov 2025.  
+// https://www.w3schools.com/cpp/cpp_date.asp
+
+// 5. “What is the arrow operator in C/C++?,”  
+// Educative.io.  
+// Last updated: 13 Nov 2025.  
+// Accessed on: 10 Nov 2025.  
+// https://www.educative.io/answers/what-is-the-arrow-operator-in-c-cpp
+
 #include <iostream>
 #include <ctime>
 #include <iomanip>
@@ -24,6 +42,7 @@ using namespace std;
 int tableNumber = 0;
 int pax = 0;
 int DineOpt=0;
+int orderCounter = 1000;
 
 struct MenuItem {
   int id;
@@ -46,6 +65,7 @@ vector<MenuItem> menu = {
 };
 
 vector<CartItem> cart;
+void displayCart();
 
 string salesFile = "sales.txt";
 
@@ -194,6 +214,63 @@ void displayMenu() {
   cout << string(42, '-') << endl;
 }
 
+string discountCode = "";
+int redemptionCount = 0;
+const int MAX_REDEMPTION = 50;
+
+void discount(){
+  time_t now = time(0);
+  tm* timeinfo = localtime(&now);
+  int hour = timeinfo->tm_hour;
+  int day = timeinfo->tm_wday;
+  char AddDisc;
+  string disc;
+  while (AddDisc != 'Y' && AddDisc != 'y' && AddDisc != 'N' && AddDisc != 'n'){
+    cout << "Add Discount? (Y/N): ";
+    cin >> AddDisc;
+    if(AddDisc == 'Y' || AddDisc == 'y'){
+        bool validCode = false;
+        while (!validCode){
+            cout << "Enter Discount Code(0 to cancel): ";
+            cin >> discountCode;
+      
+            if (discountCode == "20OFF"){
+                if (redemptionCount < MAX_REDEMPTION){
+                redemptionCount++;
+                cout << "Discount Applied!" << endl;
+                validCode = true;
+                }
+                else{
+                cout << "Redemption Limit Reached!" << endl;
+                discountCode = "";
+                }
+            }
+            else if(discountCode == "LUNCHHOUR"){
+                if ((day >= 1 && day <= 5) && (hour >= 12 && hour < 14)){
+                    cout << "Discount Applied!" << endl;
+                    validCode = true;
+                }
+                else {
+                    cout << "Discount only valid on weekdays 12-2pm!" << endl;
+                    discountCode = "";
+                }
+            }
+            else if (discountCode == "0")
+                break;
+            else{
+                cout << "Invalid Code. Please Try Again!" << endl;
+                discountCode = "";
+            }
+        }
+        break;
+    }
+    else if(AddDisc == 'N' || AddDisc == 'n')
+        break;
+    else 
+        cout << "Invalid input. Please Try Again!" << endl;
+  }
+}
+
 void viewCart(const vector<CartItem> &cart) {
   if (cart.empty()) {
     cout << "Cart is empty." << endl;
@@ -217,7 +294,7 @@ void viewCart(const vector<CartItem> &cart) {
   cout << string(42, '-') << endl;
 }
 
-void addToCart(vector<MenuItem> menu, vector<CartItem> &cart) {
+bool addToCart(vector<MenuItem> menu, vector<CartItem> &cart) {
   char addMore = 'Y';
 
   while (addMore == 'Y' || addMore == 'y') {
@@ -233,8 +310,8 @@ void addToCart(vector<MenuItem> menu, vector<CartItem> &cart) {
       cin >> id;
 
       if (id == 0) {
-        cout << "Returning to main menu..." << endl;
-        return;
+        cout << "Returning to order page..." << endl;
+        return false;
       }
 
       for (int i = 0; i < menu.size(); i++) {
@@ -289,7 +366,9 @@ void addToCart(vector<MenuItem> menu, vector<CartItem> &cart) {
       }
     }
   }
+    discount();
     cout << "\n";
+  return true;
 }
 
 void removeFromCart(vector<CartItem> &cart) {
@@ -433,6 +512,20 @@ bool checkout(vector<CartItem> &cart, int DineOption){
 
     cout << string(48, '-') << endl;
     cout << right << setw(39) << "Subtotal       : RM" << Total << endl;
+
+    double discountAmount = 0;
+    if (discountCode == "20OFF"){
+      discountAmount = Total * 0.2;
+      if (discountAmount >= 20)
+        discountAmount = 20;
+      cout << right << setw(39) << "Discount(20OFF): RM" << discountAmount << endl;
+    }
+    else if (discountCode == "LUNCHHOUR"){
+      discountAmount = Total * 0.1;
+      cout << right << setw(39) << "Discount(LUNCH): RM" << discountAmount << endl;
+    }
+    Total = Total - discountAmount;
+  
     cout << right << setw(39) << "Service Tax(6%): RM" << Total * 0.06 << endl;
     cout << right << setw(39) << "Rounding       : RM" 
          << fabs(rounding(Total * 1.06) - Total * 1.06) << endl;
@@ -458,7 +551,6 @@ bool checkout(vector<CartItem> &cart, int DineOption){
 
         cout << "Checkout successful. Thank you for your order!" << endl;
         cout << "\n============= OFFICIAL RECEIPT =============" << endl;
-        int orderCounter = 1000;
         orderCounter++;
         string orderID = "OID" + to_string(orderCounter);
         cout << "Order ID: " << orderID << endl;
@@ -505,6 +597,11 @@ bool checkout(vector<CartItem> &cart, int DineOption){
               << endl;
 
         sales.close();
+        discountCode = "";
+        cart.clear();       
+        tableNumber = 0;        
+        pax = 0;                
+        DineOpt = 0;
         return true;
     }
     else{
@@ -662,7 +759,10 @@ void displayOrder() {
       displayMenu();
       break;
     case 2:
-      addToCart(menu,cart);
+      if(addToCart(menu,cart)){
+      displayCart();
+      choice = 3;
+      }
       break;
     case 3:
       break;
@@ -691,7 +791,8 @@ void displayCart() {
       removeFromCart(cart);
       break;
     case 3:
-      checkout(cart,DineOpt);
+      if(checkout(cart,DineOpt))
+        choice=4;
       break;
     case 4:
         break;
@@ -770,3 +871,4 @@ int main() {
   while (displayMain()) {}
   return(0);
 }
+
