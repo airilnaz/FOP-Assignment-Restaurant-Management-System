@@ -126,7 +126,6 @@ void generateSimpleReport() {
         if (line.rfind(key, 0) == 0) {
             cout << line << endl;
 
-            // extract last value (after last '|')
             size_t pos = line.find_last_of('|');
             if (pos != string::npos) {
                 double amount = stod(line.substr(pos + 1));
@@ -680,7 +679,7 @@ void editMenuItem() {
     int id;
     bool itemExists = false;
 
-    displayMenu(); // Show menu so user knows the IDs
+    displayMenu();
     cout << "\nEnter Item ID to edit: ";
     cin >> id;
 
@@ -871,4 +870,5 @@ int main() {
   while (displayMain()) {}
   return(0);
 }
+
 
